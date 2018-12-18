@@ -1,4 +1,4 @@
-<html>
+﻿<html>
  <head>
   <title>Robot</title>
  </head>
@@ -20,6 +20,7 @@ $alert            =(int)$_POST["alert_status"];
 $no_picture       =(int)$_POST["no_picture"];
 $motor_state      =(int)$_POST["motor_state"];
 $direction        =$_POST["direction"];
+$obstacle         =$_POST["obstacle_status"];
 $distance         =$_POST["distance"];
 $temperature      =$_POST["temperature"];
 $brightness       =$_POST["brightness"];
@@ -42,7 +43,7 @@ if ($alert >= 0){
     //write to file
     $fp = fopen("robotInfos.txt","a"); // ouverture du fichier en écriture
     fputs($fp, "\n"); // on va a la ligne
-    fputs($fp, "$today|$alert_type[$alert]|$no_picture|$motor_state|$direction|$distance|$temperature|$brightness|$noise|\n");
+    fputs($fp, "$today|$alert_type[$alert]|$no_picture|$motor_state|$direction|$obstacle|$distance|$temperature|$brightness|$noise|\n");
     fclose($fp);
 
     //write to DB
@@ -53,7 +54,7 @@ if ($alert >= 0){
     }
 
     
-    $sql = "INSERT into robot_infos (source, alert, no_picture, motor_state, direction, distance, temperature, brightness, noise) values (1, '$alert','$no_picture','$motor_state','$direction','$distance','$temperature','$brightness','$noise')";
+    $sql = "INSERT into robot_infos (source, alert, no_picture, motor_state, direction, obstacle, distance, temperature, brightness, noise) values (1, '$alert','$no_picture','$motor_state','$direction','$obstacle','$distance','$temperature','$brightness','$noise')";
     $result = mysqli_query($con, $sql);    
  
     mysqli_close($con);
@@ -75,7 +76,7 @@ if ($alert >= 0){
 function send_alert() {
     
     global $today, $alert, $alert_type, $no_picture, $pictfile, $msg, $boundary, $flog;
-    global $motor_state, $motor_state_type, $direction, $distance, $temperature, $brightness, $noise;
+    global $motor_state, $motor_state_type, $direction, $obstacle, $distance, $temperature, $brightness, $noise;
 
     fputs($flog, "$today|$alert|$no_picture|\n");
     // clé aléatoire de limite
@@ -135,6 +136,7 @@ function send_alert() {
        $msg .= "\r\n";
        $msg .= "Motor state: $motor_state_type[$motor_state]\r\n";
        $msg .= "Direction: $direction\r\n";
+       $msg .= "Obstacle: $obstacle\r\n";
        $msg .= "Distance: $distance\r\n";
        $msg .= "Temperature: $temperature\r\n";
        $msg .= "Brightness: $brightness\r\n";
