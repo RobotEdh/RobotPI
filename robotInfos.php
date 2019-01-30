@@ -1,4 +1,4 @@
-﻿<html>
+<html>
  <head>
   <title>Robot</title>
  </head>
@@ -13,18 +13,19 @@ $today = date('l jS \of F Y h:i:s A');
 $alert = -1;
 $no_picture = 0;
 $motor_state = 0;
-$alert_type =array('No alert','Motion','Lux','Temperature');    
+$alert_type =array('No alert','Motion','Lux','Temperature','Humidity','Noise');    
 $motor_state_type =array('stopped','running');
-
+$obstacle_status_type=array('No Obstacle', 'Left OK', 'Right OK', 'Obstacle', 'Obstacle Left', 'Obstacle Right', 'Obstacle Left and Right'); 
 $alert            =(int)$_POST["alert_status"];
 $no_picture       =(int)$_POST["no_picture"];
 $motor_state      =(int)$_POST["motor_state"];
-$direction        =$_POST["direction"];
-$obstacle         =$_POST["obstacle_status"];
-$distance         =$_POST["distance"];
-$temperature      =$_POST["temperature"];
-$brightness       =$_POST["brightness"];
-$noise            =$_POST["noise"];
+$direction        =     $_POST["direction"];
+$obstacle_status  =(int)$_POST["obstacle_status"];
+$distance         =     $_POST["distance"];
+$temperature      =(float) $_POST["temperature"]/100;
+$humidity         =(float)$_POST["humidity"]/100;
+$brightness       =     $_POST["brightness"];
+$noise            =     $_POST["noise"];
 
 $msg = " ";
 // clé aléatoire de limite
@@ -43,7 +44,7 @@ if ($alert >= 0){
     //write to file
     $fp = fopen("robotInfos.txt","a"); // ouverture du fichier en écriture
     fputs($fp, "\n"); // on va a la ligne
-    fputs($fp, "$today|$alert_type[$alert]|$no_picture|$motor_state|$direction|$obstacle|$distance|$temperature|$brightness|$noise|\n");
+    fputs($fp, "$today|$alert_type[$alert]|$no_picture|$motor_state|$direction|$obstacle_status|$distance|$temperature|$humidity|$brightness|$noise|\n");
     fclose($fp);
 
     //write to DB
@@ -54,7 +55,7 @@ if ($alert >= 0){
     }
 
     
-    $sql = "INSERT into robot_infos (source, alert, no_picture, motor_state, direction, obstacle, distance, temperature, brightness, noise) values (1, '$alert','$no_picture','$motor_state','$direction','$obstacle','$distance','$temperature','$brightness','$noise')";
+    $sql = "INSERT into robot_infos (source, alert, no_picture, motor_state, direction, obstacle_status, distance, temperature, humidity, brightness, noise) values (1, '$alert','$no_picture','$motor_state','$direction','$obstacle_status','$distance','$temperature','$humidity','$brightness','$noise')";
     $result = mysqli_query($con, $sql);    
  
     mysqli_close($con);
@@ -75,8 +76,8 @@ if ($alert >= 0){
 
 function send_alert() {
     
-    global $today, $alert, $alert_type, $no_picture, $pictfile, $msg, $boundary, $flog;
-    global $motor_state, $motor_state_type, $direction, $obstacle, $distance, $temperature, $brightness, $noise;
+    global $today, $alert, $alert_type, $obstacle_status_type, $no_picture, $pictfile, $msg, $boundary, $flog;
+    global $motor_state, $motor_state_type, $direction, $obstacle_status, $distance, $temperature, $humidity, $brightness, $noise;
 
     fputs($flog, "$today|$alert|$no_picture|\n");
     // clé aléatoire de limite
@@ -132,13 +133,14 @@ function send_alert() {
     {
        $msg .= "\r\n";
        $msg .= "Hello,\r\n";
-       $msg .= "Robot ALERT\r\n";
+       $msg .= "Robot ALERT $alert_type[$alert]\r\n";
        $msg .= "\r\n";
        $msg .= "Motor state: $motor_state_type[$motor_state]\r\n";
-       $msg .= "Direction: $direction\r\n";
-       $msg .= "Obstacle: $obstacle\r\n";
-       $msg .= "Distance: $distance\r\n";
-       $msg .= "Temperature: $temperature\r\n";
+       $msg .= "Direction: $direction\xB0\r\n";
+       $msg .= "Obstacle status: $obstacle_status_type[$obstacle_status]\r\n";
+       $msg .= "Distance: $distance mm\r\n";
+       $msg .= "Temperature: $temperature \xB0C\r\n";
+       $msg .= "Humidity: $humidity %\r\n";
        $msg .= "Brightness: $brightness\r\n";
        $msg .= "Noise: $noise\r\n";
        $msg .= "\r\n";
